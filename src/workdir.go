@@ -1,14 +1,11 @@
 package src
 
 import (
-	"archive/zip"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 // WorkDir represents a directory.
@@ -100,52 +97,4 @@ func (wd *WorkDir) Abs() string {
 func (wd *WorkDir) JoinAbs(path ...string) string {
 	dir := filepath.Join(append([]string{wd.abs}, path...)...)
 	return filepath.ToSlash(dir)
-}
-
-
-// ZipWalkDirFunc is a default function used by WorkDir.Zip
-// basePath will be trim from zipped file paths
-var ZipWalkDirFunc = func(basePath string, zipWriter *zip.Writer) func(string, fs.DirEntry, error)error {
-	return func(path string, ds fs.DirEntry, err error) error {
-
-		if err != nil {
-			return err
-		}
-
-		// path as seen in zip archive
-		zipPath := filepath.Clean(path[len(filepath.Clean(basePath)):])
-		zipPath = filepath.ToSlash(zipPath)
-		if strings.HasPrefix(zipPath, "/") {
-			zipPath = zipPath[1:]
-		}
-
-		if ds.IsDir() {
-			// append "/" to path
-			zipPath += "/"
-			_, err = zipWriter.Create(zipPath)
-			if err != nil {
-				return err
-			}
-			return err
-		}
-
-		w, err := zipWriter.Create(zipPath)
-		if err != nil {
-			return err
-		}
-
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		_, err = io.Copy(w, f)
-		return err
-	}
-}
-
-// ZipDir creates a zip archive from paths in WorkDir.
-func (wd *WorkDir) Zip(dirFunc fs.WalkDirFunc, path string) error {
-	return filepath.WalkDir(wd.JoinAbs(path), dirFunc)
 }
