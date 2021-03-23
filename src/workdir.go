@@ -3,6 +3,7 @@ package src
 import (
 	"archive/zip"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -16,6 +17,10 @@ import (
 type WorkDir struct {
 	abs  string
 	path string
+}
+
+func (wd *WorkDir) String() string {
+	return fmt.Sprintf("%s|%s", wd.path, wd.abs)
 }
 
 // NewWorkDir returns new WorkDir.
@@ -99,6 +104,7 @@ func (wd *WorkDir) JoinAbs(path ...string) string {
 
 
 // ZipWalkDirFunc is a default function used by WorkDir.Zip
+// basePath will be trim from zipped file paths
 var ZipWalkDirFunc = func(basePath string, zipWriter *zip.Writer) func(string, fs.DirEntry, error)error {
 	return func(path string, ds fs.DirEntry, err error) error {
 
