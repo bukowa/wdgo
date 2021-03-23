@@ -1,0 +1,2 @@
+# wdgo
+workdir go
