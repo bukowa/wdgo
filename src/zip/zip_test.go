@@ -30,25 +30,11 @@ func Test_Zip(t *testing.T) {
 	fname := "TestWorkDir_Zip.zip.zip"
 	zipPath := filepath.Join(wd, "testdata", fname)
 	//defer os.RemoveAll(zipPath)
-
-	openZipFile := func(write bool) *os.File {
-		var perms int
-		switch write {
-		case true:
-			os.RemoveAll(zipPath)
-			perms = os.O_CREATE | os.O_EXCL
-		case false:
-			perms = os.O_RDONLY
-		}
-		f, err := os.OpenFile(zipPath, perms, 0660)
-		if err != nil {
-			t.Error(err)
-		}
-		return f
+	os.RemoveAll(zipPath)
+	f,err := os.OpenFile(zipPath, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0660)
+	if err != nil {
+		t.Error(err)
 	}
-
-	f := openZipFile(true)
-
 	var zw = zip.NewWriter(f)
 
 	zipDir := filepath.Join(testPath, "testdata", "TestWorkDir_Zip", "zip")
