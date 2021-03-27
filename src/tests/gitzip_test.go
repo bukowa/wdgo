@@ -2,9 +2,9 @@ package tests
 
 import (
 	"archive/zip"
+	"bytes"
 	. "github.com/bukowa/wdgo/src/git"
 	. "github.com/bukowa/wdgo/src/zip"
-	"os"
 	"os/exec"
 	"testing"
 )
@@ -18,18 +18,17 @@ func Test_GitZip(t *testing.T) {
 	cmdErr(r.RemoteAddOrigin(), t)
 	cmdErr(r.Cmd("pull", "origin", "HEAD"), t)
 
-	f, err := os.OpenFile("x.zip", os.O_WRONLY|os.O_CREATE, 0660)
+	w := bytes.NewBuffer(nil)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	w := zip.NewWriter(f)
-	err = NewFilePathWalker(r.JoinAbs("src"), "/", w, 0660).WalkDir(nil)
+	zw := zip.NewWriter(w)
+	err = NewFilePathWalker(r.JoinAbs("src"), "/", zw, 0660).WalkDir(nil)
 	if err != nil {
 		t.Error(err)
 	}
-	w.Close()
-	f.Close()
+	zw.Close()
 }
 
 func cmdErr(cmd *exec.Cmd, t *testing.T) {
