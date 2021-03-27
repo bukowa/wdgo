@@ -12,7 +12,7 @@ func cmdErr(cmd *exec.Cmd, t *testing.T) {
 	}
 }
 
-func TestRepository_RemoteAddOrigin(t *testing.T) {
+func TestRepository_NewTempRepository(t *testing.T) {
 	r, err := NewTempRepository("https://github.com/bukowa/wdgo.git")
 	if err != nil {
 		t.Error(err)

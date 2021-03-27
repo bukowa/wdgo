@@ -23,7 +23,7 @@ func Test_filePathWalker_WalkDir(t *testing.T) {
 		dstDir string
 		writer *zip.Writer
 		perm   os.FileMode
-		want map[string][]byte
+		want   map[string][]byte
 	}
 	type args struct {
 		denyFunc FilePathDenyFunc
@@ -35,8 +35,8 @@ func Test_filePathWalker_WalkDir(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    ".",
-			fields:  fields{
+			name: "basic",
+			fields: fields{
 				srcDir: filepath.Join(testWorkDir(), "testdata", "TestNewFilePathWalker", "zip"),
 				dstDir: "zipdest",
 				// set later in test
@@ -48,7 +48,64 @@ func Test_filePathWalker_WalkDir(t *testing.T) {
 					"zipdest/2":   []byte("22"),
 				},
 			},
-			args:    args{
+			args: args{
+				denyFunc: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "/",
+			fields: fields{
+				srcDir: filepath.Join(testWorkDir(), "testdata", "TestNewFilePathWalker", "zip"),
+				dstDir: "/",
+				// set later in test
+				writer: nil,
+				perm:   0600,
+				want: map[string][]byte{
+					"1":   []byte("11"),
+					"3/4": []byte("44"),
+					"2":   []byte("22"),
+				},
+			},
+			args: args{
+				denyFunc: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "./",
+			fields: fields{
+				srcDir: filepath.Join(testWorkDir(), "testdata", "TestNewFilePathWalker", "zip"),
+				dstDir: "./",
+				// set later in test
+				writer: nil,
+				perm:   0600,
+				want: map[string][]byte{
+					"1":   []byte("11"),
+					"3/4": []byte("44"),
+					"2":   []byte("22"),
+				},
+			},
+			args: args{
+				denyFunc: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: ".",
+			fields: fields{
+				srcDir: filepath.Join(testWorkDir(), "testdata", "TestNewFilePathWalker", "zip"),
+				dstDir: "/",
+				// set later in test
+				writer: nil,
+				perm:   0600,
+				want: map[string][]byte{
+					"1":   []byte("11"),
+					"3/4": []byte("44"),
+					"2":   []byte("22"),
+				},
+			},
+			args: args{
 				denyFunc: nil,
 			},
 			wantErr: false,
@@ -58,6 +115,7 @@ func Test_filePathWalker_WalkDir(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := bytes.NewBuffer(nil)
 			tt.fields.writer = zip.NewWriter(w)
+
 			f := NewFilePathWalker(
 				tt.fields.srcDir,
 				tt.fields.dstDir,
